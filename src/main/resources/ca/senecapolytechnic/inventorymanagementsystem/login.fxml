@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="165.0" prefWidth="121.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ca.senecapolytechnic.inventorymanagementsystem.controller.LoginController">
+    <children>
+        <VBox alignment="TOP_CENTER" prefHeight="279.0" prefWidth="287.0">
+            <children>
+                <Label prefHeight="53.0" prefWidth="153.0" text="Inventory Management System">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Label>
+                <GridPane prefHeight="173.0" prefWidth="233.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="10.0" prefWidth="67.00001653035481" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="206.99999237060547" minWidth="10.0" prefWidth="139.6666501363119" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints maxHeight="64.00000190734863" minHeight="10.0" prefHeight="42.66667048136394" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="20.99999618530274" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="26.66666030883789" minHeight="0.0" prefHeight="26.000003814697266" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <children>
+                        <Label text="Username:" />
+                        <Label text="Password:" GridPane.rowIndex="1">
+                            <GridPane.margin>
+                                <Insets top="5.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <TextField fx:id="usernameField" prefHeight="25.0" prefWidth="148.0" GridPane.columnIndex="1" />
+                        <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    </children>
+                    <VBox.margin>
+                        <Insets left="25.0" right="25.0" />
+                    </VBox.margin>
+                </GridPane>
+                <Button mnemonicParsing="false" onAction="#handleLogin" text="Log In" />
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
