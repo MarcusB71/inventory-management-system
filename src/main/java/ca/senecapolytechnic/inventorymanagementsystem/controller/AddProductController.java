@@ -2,6 +2,9 @@ package ca.senecapolytechnic.inventorymanagementsystem.controller;
 import ca.senecapolytechnic.inventorymanagementsystem.models.Inventory;
 import ca.senecapolytechnic.inventorymanagementsystem.models.Part;
 import ca.senecapolytechnic.inventorymanagementsystem.models.Product;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -42,18 +45,18 @@ public class AddProductController {
         Integer generatedProductID = Inventory.generateProductId();
         productIDLabel.setText(generatedProductID.toString());
         // Initialize All Parts Table
-        allPartsIDCol.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        allPartsNameCol.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        allPartsStockCol.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
-        allPartsPriceCol.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
+        allPartsIDCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        allPartsNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        allPartsStockCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStock()).asObject());
+        allPartsPriceCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getPrice()).asObject());
 
         allPartsTable.setItems(Inventory.getAllParts());
 
         // Initialize Associated Parts Table
-        assocPartsIDCol.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        assocPartsNameCol.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        assocPartsStockCol.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
-        assocPartsPriceCol.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
+        assocPartsIDCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        assocPartsNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        assocPartsStockCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStock()).asObject());
+        assocPartsPriceCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getPrice()).asObject());
 
         associatedPartsTable.setItems(associatedParts);
     }

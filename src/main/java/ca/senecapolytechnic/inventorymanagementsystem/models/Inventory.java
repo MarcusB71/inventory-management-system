@@ -3,7 +3,14 @@ package ca.senecapolytechnic.inventorymanagementsystem.models;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class Inventory {
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Inventory implements Serializable {
     private static ObservableList<Part> allParts = FXCollections.observableArrayList();
     private static ObservableList<Product> allProducts = FXCollections.observableArrayList();
     private static int partIdCounter = 1;
@@ -12,9 +19,23 @@ public class Inventory {
     public static ObservableList<Part> getAllParts() {
         return allParts;
     }
+
     public static ObservableList<Product> getAllProducts() {
         return allProducts;
     }
+
+//    public static void writeObject(ObjectOutputStream oos) throws IOException {
+//        oos.defaultWriteObject();  // Write the non-transient fields
+//        oos.writeObject(new ArrayList<>(allParts));  // Convert ObservableList to ArrayList
+//        oos.writeObject(new ArrayList<>(allProducts));  // Convert ObservableList to ArrayList
+//    }
+
+    // Custom deserialization: Convert List back to ObservableList
+//    public void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+//        ois.defaultReadObject();  // Read the non-transient fields
+//        allParts = (List<Part>) ois.readObject();  // Read List and assign to allParts
+//        allProducts = (List<Product>) ois.readObject();  // Read List and assign to allProducts
+//    }
 
     public static void addPart(Part part) {
         allParts.add(part);
@@ -91,4 +112,7 @@ public class Inventory {
     public static int generateProductId() {
         return productIdCounter++;
     }
+
+    public static void setAllParts(ObservableList<Part> parts) { allParts = parts; }
+    public static void setAllProducts(ObservableList<Product> products) { allProducts = products; }
 }

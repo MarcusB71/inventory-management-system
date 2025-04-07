@@ -11,9 +11,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="562.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ca.senecapolytechnic.inventorymanagementsystem.controller.MainViewController">
+<AnchorPane prefHeight="593.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ca.senecapolytechnic.inventorymanagementsystem.controller.MainViewController">
    <children>
-      <VBox prefHeight="562.0" prefWidth="600.0">
+      <VBox prefHeight="593.0" prefWidth="600.0">
          <children>
             <Label text="Inventory Management System">
                <font>
@@ -111,6 +111,30 @@
                            </HBox.margin>
                         </Button>
                         <Button mnemonicParsing="false" onAction="#deleteProduct" text="Delete">
+                           <HBox.margin>
+                              <Insets top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="45.0" prefWidth="580.0">
+                     <children>
+                        <Button fx:id="btnSaveToFile" mnemonicParsing="false" onAction="#handleSaveToFile" text="Save Data to File">
+                           <HBox.margin>
+                              <Insets right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="btnLoadFromFile" mnemonicParsing="false" onAction="#handleLoadFromFile" text="Load Data from File">
+                           <HBox.margin>
+                              <Insets right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="btnWriteToDB" mnemonicParsing="false" onAction="#handleWriteToDB" text="Write Data on DB">
+                           <HBox.margin>
+                              <Insets right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="btnLoadFromDB" mnemonicParsing="false" onAction="#handleLoadFromDB" text="Load Data from DB">
                            <HBox.margin>
                               <Insets top="5.0" />
                            </HBox.margin>

@@ -4,99 +4,92 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-public class Product {
-    private final IntegerProperty id;
-    private final StringProperty name;
-    private final DoubleProperty price;
-    private final IntegerProperty stock;
-    private final IntegerProperty min;
-    private final IntegerProperty max;
-    private final ObservableList<Part> associatedParts = FXCollections.observableArrayList();
+public class Product implements Serializable {
+    private int id;
+    private String name;
+    private Double price;
+    private int stock;
+    private int min;
+    private int max;
+    private List<Part> associatedParts;
 
     public Product(Integer id, String name, Double price, Integer stock, Integer min, Integer max) {
-        this.id = new SimpleIntegerProperty(id);
-        this.name = new SimpleStringProperty(name);
-        this.price = new SimpleDoubleProperty(price);
-        this.stock = new SimpleIntegerProperty(stock);
-        this.min = new SimpleIntegerProperty(min);
-        this.max = new SimpleIntegerProperty(max);
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+        this.min = min;
+        this.max = max;
+        this.associatedParts = new ArrayList<>();
     }
 
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();  // Write the non-transient fields
+        oos.writeObject(new ArrayList<>(associatedParts));  // Convert ObservableList to ArrayList
+    }
+
+    // Custom deserialization: Convert ArrayList back to ObservableList
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();  // Read the non-transient fields
+        this.associatedParts = FXCollections.observableArrayList((List<Part>) ois.readObject());  // Convert ArrayList back to ObservableList
+    }
     public int getId() {
-        return id.get();
-    }
-
-    public void setId(int id) {
-        this.id.set(id);
-    }
-
-    public IntegerProperty idProperty() {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getName() {
-        return name.get();
-    }
-
-    public void setName(String name) {
-        this.name.set(name);
-    }
-
-    public StringProperty nameProperty() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public double getPrice() {
-        return price.get();
-    }
-
-    public void setPrice(double price) {
-        this.price.set(price);
-    }
-
-    public DoubleProperty priceProperty() {
         return price;
     }
 
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
     public int getStock() {
-        return stock.get();
-    }
-
-    public void setStock(int stock) {
-        this.stock.set(stock);
-    }
-
-    public IntegerProperty stockProperty() {
         return stock;
     }
 
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
     public int getMin() {
-        return min.get();
-    }
-
-    public void setMin(int min) {
-        this.min.set(min);
-    }
-
-    public IntegerProperty minProperty() {
         return min;
     }
 
+    public void setMin(int min) {
+        this.min = min;
+    }
+
     public int getMax() {
-        return max.get();
+        return max;
     }
 
     public void setMax(int max) {
-        this.max.set(max);
+        this.max = max;
     }
 
-    public IntegerProperty maxProperty() {
-        return max;
-    }
     public ObservableList<Part> getAssociatedParts() {
-        return associatedParts;
+        return FXCollections.observableArrayList(associatedParts);
     }
 
     public void addAssociatedPart(Part part) {

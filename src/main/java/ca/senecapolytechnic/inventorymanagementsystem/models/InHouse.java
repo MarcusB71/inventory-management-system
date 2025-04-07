@@ -3,15 +3,15 @@ package ca.senecapolytechnic.inventorymanagementsystem.models;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class InHouse extends Part{
-    private final IntegerProperty machineID = new SimpleIntegerProperty();
+public class InHouse extends Part {
+    private int machineID;
 
-    public InHouse(Integer id, String name, Double price, Integer stock, Integer min, Integer max, Integer machineID) {
+    public InHouse(int id, String name, double price, int stock, int min, int max, int machineID) {
         super(id, name, price, stock, min, max);
-        this.machineID.set(machineID);
+        this.machineID = machineID;
     }
-    public IntegerProperty machineIDProperty() { return machineID; }
 
-    public int getMachineID() { return machineID.get(); }
-    public void setMachineID(int machineID) { this.machineID.set(machineID); }
+    public int getMachineID() {return machineID;}
+
+    public void setMachineID(int machineID) { this.machineID = machineID; }
 }

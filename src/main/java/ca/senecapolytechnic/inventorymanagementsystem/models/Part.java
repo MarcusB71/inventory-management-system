@@ -2,45 +2,40 @@ package ca.senecapolytechnic.inventorymanagementsystem.models;
 
 import javafx.beans.property.*;
 
-public abstract class Part {
-    private final IntegerProperty id = new SimpleIntegerProperty();
-    private final StringProperty name = new SimpleStringProperty();
-    private final DoubleProperty price = new SimpleDoubleProperty();
-    private final IntegerProperty stock = new SimpleIntegerProperty();
-    private final IntegerProperty min = new SimpleIntegerProperty();
-    private final IntegerProperty max = new SimpleIntegerProperty();
+import java.io.Serializable;
+
+public abstract class Part implements Serializable {
+    private int id;
+    private String name;
+    private Double price;
+    private int stock;
+    private int min;
+    private int max;
 
     public Part(int id, String name, double price, int stock, int min, int max) {
-        this.id.set(id);
-        this.name.set(name);
-        this.price.set(price);
-        this.stock.set(stock);
-        this.min.set(min);
-        this.max.set(max);
+        this.id= id;
+        this.name= name;
+        this.price= price;
+        this.stock= stock;
+        this.min= min;
+        this.max= max;
     }
 
-    public IntegerProperty idProperty() { return id; }
-    public StringProperty nameProperty() { return name; }
-    public DoubleProperty priceProperty() { return price; }
-    public IntegerProperty stockProperty() { return stock; }
-    public IntegerProperty minProperty() { return min; }
-    public IntegerProperty maxProperty() { return max; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public int getId() { return id.get(); }
-    public void setId(int id) { this.id.set(id); }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() { return name.get(); }
-    public void setName(String name) { this.name.set(name); }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 
-    public double getPrice() { return price.get(); }
-    public void setPrice(double price) { this.price.set(price); }
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
 
-    public int getStock() { return stock.get(); }
-    public void setStock(int stock) { this.stock.set(stock); }
+    public int getMin() { return min; }
+    public void setMin(int min) { this.min = min; }
 
-    public int getMin() { return min.get(); }
-    public void setMin(int min) { this.min.set(min); }
-
-    public int getMax() { return max.get(); }
-    public void setMax(int max) { this.max.set(max); }
+    public int getMax() { return max; }
+    public void setMax(int max) { this.max = max; }
 }

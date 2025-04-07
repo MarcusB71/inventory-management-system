@@ -5,15 +5,19 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class Outsourced extends Part{
+public class Outsourced extends Part {
 
-    private final StringProperty companyName = new SimpleStringProperty();
-    public Outsourced(Integer ID, String name, Double price, Integer stock, Integer min, Integer max, String companyName) {
-        super(ID, name, price, stock, min, max);
-        this.companyName.set(companyName);
+    private String companyName;
+
+    public Outsourced(int id, String name, double price, int stock, int min, int max, String companyName) {
+        super(id, name, price, stock, min, max);
+        this.companyName = companyName;
     }
-    public StringProperty companyNameProperty() { return companyName; }
+    public String getCompanyName() {return companyName;}
 
-    public String getCompanyName() { return companyName.get(); }
-    public void setCompanyName(String companyName) { this.companyName.set(companyName); }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
+
+
+
 }
+

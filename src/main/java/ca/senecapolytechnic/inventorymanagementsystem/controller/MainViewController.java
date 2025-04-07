@@ -1,6 +1,9 @@
 package ca.senecapolytechnic.inventorymanagementsystem.controller;
 
 import ca.senecapolytechnic.inventorymanagementsystem.models.*;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,8 +12,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import java.io.*;
+import java.sql.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MainViewController {
     @FXML private TableView<Part> partsTable;
@@ -29,15 +43,15 @@ public class MainViewController {
     @FXML private TextField searchProductsField;
 
     public void initialize(){
-        partIDCol.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        partNameCol.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        partStockCol.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
-        partPriceCol.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
+        partIDCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        partNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        partStockCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStock()).asObject());
+        partPriceCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getPrice()).asObject());
 
-        productIDCol.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        productNameCol.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        productStockCol.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
-        productPriceCol.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
+        productIDCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        productNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        productStockCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStock()).asObject());
+        productPriceCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getPrice()).asObject());
 
 
         Part part1 = new InHouse(Inventory.generatePartID(), "Wheel", 20.99, 15, 1, 30, 10231);
@@ -265,4 +279,257 @@ public class MainViewController {
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
     }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    @FXML
+    public void handleSaveToFile() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("data.dat"))) {
+
+            oos.writeObject(new ArrayList<Part>(Inventory.getAllParts()));
+            oos.writeObject(new ArrayList<Product>(Inventory.getAllProducts()));
+            System.out.println("Data saved to file.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void handleLoadFromFile() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data.dat"))) {
+            // Read the parts and products from the file
+            ArrayList<Part> loadedParts = (ArrayList<Part>) ois.readObject();
+            ArrayList<Product> loadedProducts = (ArrayList<Product>) ois.readObject();
+
+            // Clear current inventory data before loading new data
+            Inventory.getAllParts().clear();
+            Inventory.getAllProducts().clear();
+
+            // Add the loaded parts and products to the inventory
+            Inventory.getAllParts().addAll(loadedParts);
+            Inventory.getAllProducts().addAll(loadedProducts);
+
+            System.out.println("Data loaded from file.");
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @FXML
+    public void handleWriteToDB() {
+        String dbLocation = "jdbc:sqlite:C:\\Users\\Marcus\\IdeaProjects\\InventoryManagementSystem\\src\\main\\java\\ca\\senecapolytechnic\\inventorymanagementsystem\\database\\test.db";
+        try (Connection conn = DriverManager.getConnection(dbLocation)) {
+            Statement stmt = conn.createStatement();
+            // delete tables so they can be overwritten
+            stmt.execute("DELETE FROM product_parts");
+            stmt.execute("DELETE FROM parts");
+            stmt.execute("DELETE FROM products");
+
+            String createPartsTable = """
+            CREATE TABLE IF NOT EXISTS parts (
+                id INT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                price DECIMAL(10,2) NOT NULL,
+                stock INT NOT NULL,
+                min INT NOT NULL,
+                max INT NOT NULL,
+                machineID INT NULL,
+                companyName VARCHAR(255) NULL
+            )
+        """;
+            stmt.execute(createPartsTable);
+
+            String createProductsTable = """
+            CREATE TABLE IF NOT EXISTS products (
+                id INT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                price DECIMAL(10,2) NOT NULL,
+                stock INT NOT NULL,
+                min INT NOT NULL,
+                max INT NOT NULL
+            )
+        """;
+            stmt.execute(createProductsTable);
+
+            String createProductPartsTable = """
+            CREATE TABLE IF NOT EXISTS product_parts (
+                product_id INT NOT NULL,
+                part_id INT NOT NULL,
+                PRIMARY KEY (product_id, part_id),
+                FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+                FOREIGN KEY (part_id) REFERENCES parts(id) ON DELETE CASCADE
+            )
+        """;
+            stmt.execute(createProductPartsTable);
+
+            // Save parts
+            String partSql = "INSERT INTO parts (id, name, price, stock, min, max, machineID, companyName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement partStmt = conn.prepareStatement(partSql)) {
+                for (Part part : Inventory.getAllParts()) {
+                    partStmt.setInt(1, part.getId());
+                    partStmt.setString(2, part.getName());
+                    partStmt.setDouble(3, part.getPrice());
+                    partStmt.setInt(4, part.getStock());
+                    partStmt.setInt(5, part.getMin());
+                    partStmt.setInt(6, part.getMax());
+
+                    // Check if part is InHouse or Outsourced
+                    if (part instanceof InHouse) {
+                        partStmt.setInt(7, ((InHouse) part).getMachineID());
+                        partStmt.setString(8, null); // Set company name as null for InHouse
+                    } else if (part instanceof Outsourced) {
+                        partStmt.setInt(7, 0); // Set machineID as 0 for Outsourced
+                        partStmt.setString(8, ((Outsourced) part).getCompanyName());
+                    }
+                    partStmt.addBatch();
+                }
+                partStmt.executeBatch();
+            }
+
+            // Save products (similar to parts)
+            String productSql = "INSERT INTO products (id, name, price, stock, min, max) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement productStmt = conn.prepareStatement(productSql)) {
+                for (Product product : Inventory.getAllProducts()) {
+                    productStmt.setInt(1, product.getId());
+                    productStmt.setString(2, product.getName());
+                    productStmt.setDouble(3, product.getPrice());
+                    productStmt.setInt(4, product.getStock());
+                    productStmt.setInt(5, product.getMin());
+                    productStmt.setInt(6, product.getMax());
+                    productStmt.addBatch();
+                }
+                productStmt.executeBatch();
+            }
+
+            // Product associated Parts table
+                String productPartSql = "INSERT INTO product_parts (product_id, part_id) VALUES (?, ?)";
+            try (PreparedStatement productPartStmt = conn.prepareStatement(productPartSql)){
+
+                for (Product product : Inventory.getAllProducts()) {
+                    for (Part part : product.getAssociatedParts()) {
+                        productPartStmt.setInt(1, product.getId());
+                        productPartStmt.setInt(2, part.getId());
+                        productPartStmt.addBatch();
+                    }
+                }
+
+                productPartStmt.executeBatch(); // Execute all insertions at once for efficiency
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            System.out.println("Data saved to database successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to save data to the database.");
+        }
+    }
+    @FXML
+    public void handleLoadFromDB() {
+        String dbLocation = "jdbc:sqlite:C:\\Users\\Marcus\\IdeaProjects\\InventoryManagementSystem\\src\\main\\java\\ca\\senecapolytechnic\\inventorymanagementsystem\\database\\test.db";
+        try (Connection conn = DriverManager.getConnection(dbLocation)) {
+            // Load parts
+            String partSql = "SELECT * FROM parts";
+            try (PreparedStatement partStmt = conn.prepareStatement(partSql);
+                 ResultSet rs = partStmt.executeQuery()) {
+
+                List<Part> parts = new ArrayList<>();
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String name = rs.getString("name");
+                    double price = rs.getDouble("price");
+                    int stock = rs.getInt("stock");
+                    int min = rs.getInt("min");
+                    int max = rs.getInt("max");
+
+                    // Check if part is InHouse or Outsourced
+                    if (rs.getString("companyName") == null) {
+                        // InHouse part
+                        int machineID = rs.getInt("machineID");
+                        parts.add(new InHouse(id, name, price, stock, min, max, machineID));
+                    } else {
+                        // Outsourced part
+                        String companyName = rs.getString("companyName");
+                        parts.add(new Outsourced(id, name, price, stock, min, max, companyName));
+                    }
+                }
+                Inventory.setAllParts(FXCollections.observableArrayList(parts));
+            }
+
+            // Load products (similar to parts)
+            String productSql = "SELECT * FROM products";
+            try (PreparedStatement productStmt = conn.prepareStatement(productSql);
+                 ResultSet rs = productStmt.executeQuery()) {
+
+                List<Product> products = new ArrayList<>();
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String name = rs.getString("name");
+                    double price = rs.getDouble("price");
+                    int stock = rs.getInt("stock");
+                    int min = rs.getInt("min");
+                    int max = rs.getInt("max");
+                    products.add(new Product(id, name, price, stock, min, max));
+                }
+                Inventory.setAllProducts(FXCollections.observableArrayList(products));
+            }
+
+            try {
+                String sql = """
+            SELECT pp.product_id, p.id, p.name, p.price, p.stock, p.min, p.max, p.machineID, p.companyName 
+            FROM parts p
+            JOIN product_parts pp ON p.id = pp.part_id
+        """;
+
+                try (PreparedStatement stmt = conn.prepareStatement(sql);
+                     ResultSet rs = stmt.executeQuery()) {
+
+                    while (rs.next()) {
+                        int productId = rs.getInt("product_id");
+                        int partId = rs.getInt("id");
+                        String name = rs.getString("name");
+                        double price = rs.getDouble("price");
+                        int stock = rs.getInt("min");
+                        int min = rs.getInt("min");
+                        int max = rs.getInt("max");
+                        Integer machineId = rs.getObject("machineID", Integer.class); // Nullable
+                        String companyName = rs.getString("companyName"); // Nullable
+
+                        Part part;
+                        if (companyName != null) {
+                            part = new Outsourced(partId, name, price, stock, min, max, companyName);
+                        } else {
+                            part = new InHouse(partId, name, price, stock, min, max, machineId);
+                        }
+
+                        for (Product product : Inventory.getAllProducts()) {
+                            if (productId == product.getId()){
+                                product.addAssociatedPart(part);
+                            }
+                        }
+                    }
+                    loadProductsTable();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            System.out.println("Data loaded from database successfully!");
+            handleRefresh(); // Update the UI after loading data
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load data from the database.");
+        }
+    }
+        @FXML
+        public void handleRefresh(){
+            loadPartsTable();
+            loadProductsTable();
+        }
 }

@@ -3,6 +3,9 @@ package ca.senecapolytechnic.inventorymanagementsystem.controller;
 import ca.senecapolytechnic.inventorymanagementsystem.models.Inventory;
 import ca.senecapolytechnic.inventorymanagementsystem.models.Part;
 import ca.senecapolytechnic.inventorymanagementsystem.models.Product;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,6 +29,7 @@ public class ModifyProductController {
     @FXML private Label IDLabel;
     private Product selectedProduct;
     private ObservableList<Part> tempAssociatedParts = FXCollections.observableArrayList();
+    private ObservableList<Part> partsToRemove = FXCollections.observableArrayList();
 
     public void setProduct(Product product) {
         selectedProduct = product;
@@ -37,17 +41,17 @@ public class ModifyProductController {
         maxField.setText(String.valueOf(product.getMax()));
         tempAssociatedParts.setAll(product.getAssociatedParts());
 
-        allPartsIDCol.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        allPartsNameCol.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        allPartsStockCol.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
-        allPartsPriceCol.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
+        allPartsIDCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        allPartsNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        allPartsStockCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStock()).asObject());
+        allPartsPriceCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getPrice()).asObject());
 
         allPartsTable.setItems(Inventory.getAllParts());
 
-        assocPartsIDCol.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        assocPartsNameCol.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        assocPartsStockCol.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
-        assocPartsPriceCol.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
+        assocPartsIDCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        assocPartsNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        assocPartsStockCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStock()).asObject());
+        assocPartsPriceCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getPrice()).asObject());
 
         associatedPartsTable.setItems(tempAssociatedParts);
     }
@@ -65,24 +69,49 @@ public class ModifyProductController {
         Part selectedPart = associatedPartsTable.getSelectionModel().getSelectedItem();
         if (selectedPart != null) {
             tempAssociatedParts.remove(selectedPart);
+            partsToRemove.add(selectedPart);
         }
+
     }
 
     @FXML
     private void onSave() {
         try {
-            selectedProduct.setName(nameField.getText());
-            selectedProduct.setStock(Integer.parseInt(stockField.getText()));
-            selectedProduct.setPrice(Double.parseDouble(priceField.getText()));
-            selectedProduct.setMin(Integer.parseInt(minField.getText()));
-            selectedProduct.setMax(Integer.parseInt(maxField.getText()));
+            int id = Integer.parseInt(IDLabel.getText());
+            String name = nameField.getText().trim();
+            int stock = Integer.parseInt(stockField.getText().trim());
+            double price = Double.parseDouble(priceField.getText().trim());
+            int min = Integer.parseInt(minField.getText().trim());
+            int max = Integer.parseInt(maxField.getText().trim());
+
+            // Set the new values for selectedProduct directly
+            selectedProduct.setName(name);
+            selectedProduct.setStock(stock);
+            selectedProduct.setPrice(price);
+            selectedProduct.setMin(min);
+            selectedProduct.setMax(max);
+
+            for (Part part : partsToRemove) {
+                selectedProduct.deleteAssociatedPart(part);
+            }
+
+            // Update the associated parts list of the product
             selectedProduct.getAssociatedParts().setAll(tempAssociatedParts);
+
+            // Optionally, you can re-add parts to the product's associated parts
+            for (Part part : tempAssociatedParts) {
+                selectedProduct.addAssociatedPart(part);
+            }
+            // Update the product in the inventory (no need to create a new product)
+            Inventory.updateProduct(id, selectedProduct);
+
             closeWindow();
 
         } catch (NumberFormatException e) {
-        showErrorDialog("Please enter valid numbers for Name, Stock, Price, Min, and Max.");
+            showErrorDialog("Please enter valid numbers for Name, Stock, Price, Min, and Max.");
         }
     }
+
 
     @FXML
     private void onCancel() {
