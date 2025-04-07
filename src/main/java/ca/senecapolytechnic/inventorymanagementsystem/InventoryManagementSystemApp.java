@@ -1,5 +1,5 @@
 /**********************************************
- Workshop # 4&5
+ Workshop # 6&7
  Course: APD545
  Last Name: Brown
  First Name: Marcus
@@ -7,7 +7,7 @@
  Section: NBB
  This assignment represents my own work in accordance with Seneca Academic Policy.
  Signature
- Date: March 16, 2025
+ Date: April 2, 2025
  **********************************************/
 package ca.senecapolytechnic.inventorymanagementsystem;
 
@@ -29,6 +29,6 @@ public class InventoryManagementSystemApp extends Application {
     }
 
     public static void main(String[] args) {
-        launch();
+   launch();
     }
 }
